@@ -1,0 +1,45 @@
+<?php
+
+namespace App\Livewire;
+
+use App\Models\PhotoJob;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Livewire\Component;
+
+class CameraCapture extends Component
+{
+    public string $status = '';
+
+    public function capture(string $imageData): void
+    {
+        if (!preg_match('/^data:image\/(\w+);base64,/', $imageData, $type)) {
+            $this->status = 'Error: Invalid image data';
+            return;
+        }
+
+        $extension = strtolower($type[1]);
+        $filename = 'photos/' . Str::uuid() . '.' . $extension;
+        $raw = base64_decode(substr($imageData, strpos($imageData, ',') + 1));
+
+        Storage::disk('public')->put($filename, $raw);
+
+        $job = PhotoJob::create([
+            'image_path' => $filename,
+            'status' => 'pending',
+        ]);
+
+        $this->status = "Job #{$job->id} created";
+    }
+
+    public function render()
+    {
+        $recentPhotos = PhotoJob::latest()->take(10)->get()->map(fn($job) => [
+            'id'        => $job->id,
+            'url'       => Storage::disk('public')->url($job->image_path),
+            'status'    => $job->status,
+        ]);
+
+        return view('livewire.camera-capture', compact('recentPhotos'));
+    }
+}
