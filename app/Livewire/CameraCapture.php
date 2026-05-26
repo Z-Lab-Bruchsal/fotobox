@@ -50,7 +50,7 @@ class CameraCapture extends Component
     {
         $recentPhotos = PhotoJob::latest()->take(10)->get()->map(fn($job) => [
             'id'     => $job->id,
-            'url'    => Storage::disk('public')->url($job->image_path),
+            'url'    => Storage::disk('public')->url($job->image_path) . '?v=' . $job->updated_at->timestamp,
             'status' => $job->status,
         ]);
 

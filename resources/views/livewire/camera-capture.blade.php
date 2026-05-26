@@ -32,11 +32,15 @@
                 @foreach ($recentPhotos as $photo)
                     <div class="relative">
                         @if ($photo['status'] === 'processing')
-                            <div class="w-full aspect-square rounded-lg border border-gray-700 bg-gray-900 flex flex-col items-center justify-center gap-2">
-                                <svg class="w-8 h-8 text-gray-500 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
-                                </svg>
+                            <div class="relative w-full aspect-square">
+                                <img src="{{ $photo['url'] }}" alt="Photo #{{ $photo['id'] }}"
+                                     class="w-full aspect-square object-cover rounded-lg border border-gray-700">
+                                <div class="absolute inset-0 rounded-lg bg-black/50 flex items-center justify-center">
+                                    <svg class="w-8 h-8 text-white animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                                    </svg>
+                                </div>
                             </div>
                         @else
                             <img src="{{ $photo['url'] }}" alt="Photo #{{ $photo['id'] }}"
