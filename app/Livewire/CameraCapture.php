@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Jobs\ConvertToComic;
 use App\Models\PhotoJob;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -37,20 +38,24 @@ class CameraCapture extends Component
 
         $job = PhotoJob::create([
             'image_path' => $filename,
-            'status' => 'pending',
+            'status' => 'processing',
         ]);
 
-        $this->status = "Job #{$job->id} created";
+        ConvertToComic::dispatch($job);
+
+        $this->status = "Processing photo…";
     }
 
     public function render()
     {
         $recentPhotos = PhotoJob::latest()->take(10)->get()->map(fn($job) => [
-            'id'        => $job->id,
-            'url'       => Storage::disk('public')->url($job->image_path),
-            'status'    => $job->status,
+            'id'     => $job->id,
+            'url'    => Storage::disk('public')->url($job->image_path),
+            'status' => $job->status,
         ]);
 
-        return view('livewire.camera-capture', compact('recentPhotos'));
+        $hasProcessing = $recentPhotos->contains('status', 'processing');
+
+        return view('livewire.camera-capture', compact('recentPhotos', 'hasProcessing'));
     }
 }
