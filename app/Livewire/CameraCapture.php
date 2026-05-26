@@ -11,6 +11,17 @@ class CameraCapture extends Component
 {
     public string $status = '';
 
+    public function delete(int $jobId): void
+    {
+        $job = PhotoJob::find($jobId);
+        if (!$job) return;
+
+        Storage::disk('public')->delete($job->image_path);
+        $job->delete();
+
+        $this->status = "Job #{$jobId} deleted";
+    }
+
     public function capture(string $imageData): void
     {
         if (!preg_match('/^data:image\/(\w+);base64,/', $imageData, $type)) {
