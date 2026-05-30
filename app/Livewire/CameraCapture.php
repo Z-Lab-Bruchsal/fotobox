@@ -4,6 +4,8 @@ namespace App\Livewire;
 
 use App\Jobs\ConvertToComic;
 use App\Models\PhotoJob;
+use App\Models\PhotoSession;
+use App\Models\PhotoSetting;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Component;
@@ -11,17 +13,6 @@ use Livewire\Component;
 class CameraCapture extends Component
 {
     public string $status = '';
-
-    public function delete(int $jobId): void
-    {
-        $job = PhotoJob::find($jobId);
-        if (!$job) return;
-
-        Storage::disk('public')->delete($job->image_path);
-        $job->delete();
-
-        $this->status = "Job #{$jobId} deleted";
-    }
 
     public function capture(string $imageData): void
     {
@@ -31,31 +22,66 @@ class CameraCapture extends Component
         }
 
         $extension = strtolower($type[1]);
-        $filename = 'photos/' . Str::uuid() . '.' . $extension;
         $raw = base64_decode(substr($imageData, strpos($imageData, ',') + 1));
 
-        Storage::disk('public')->put($filename, $raw);
+        $originalPath = 'photos/' . Str::uuid() . '.' . $extension;
+        Storage::disk('public')->put($originalPath, $raw);
 
-        $job = PhotoJob::create([
-            'image_path' => $filename,
-            'status' => 'processing',
-        ]);
+        $session = PhotoSession::create(['original_image_path' => $originalPath]);
 
-        ConvertToComic::dispatch($job);
+        $settings = PhotoSetting::active()->get();
 
-        $this->status = "Processing photo…";
+        foreach ($settings as $setting) {
+            $variantPath = 'photos/' . Str::uuid() . '.' . $extension;
+            Storage::disk('public')->put($variantPath, $raw);
+
+            $job = PhotoJob::create([
+                'image_path'       => $variantPath,
+                'status'           => 'processing',
+                'photo_session_id' => $session->id,
+                'photo_setting_id' => $setting->id,
+            ]);
+
+            ConvertToComic::dispatch($job);
+        }
+
+        $this->status = count($settings) . ' Varianten werden erstellt…';
+    }
+
+    public function selectVariant(int $sessionId, int $jobId): void
+    {
+        PhotoSession::where('id', $sessionId)->update(['selected_job_id' => $jobId]);
+    }
+
+    public function deleteSession(int $sessionId): void
+    {
+        $session = PhotoSession::with('jobs')->find($sessionId);
+        if (!$session) return;
+
+        foreach ($session->jobs as $job) {
+            Storage::disk('public')->delete($job->image_path);
+            $job->delete();
+        }
+
+        Storage::disk('public')->delete($session->original_image_path);
+        $session->delete();
+
+        $this->status = "Session #{$sessionId} gelöscht";
     }
 
     public function render()
     {
-        $recentPhotos = PhotoJob::latest()->take(10)->get()->map(fn($job) => [
-            'id'     => $job->id,
-            'url'    => Storage::disk('public')->url($job->image_path) . '?v=' . $job->updated_at->timestamp,
-            'status' => $job->status,
-        ]);
+        $sessions = PhotoSession::latest()->take(10)->get();
 
-        $hasProcessing = $recentPhotos->contains('status', 'processing');
+        foreach ($sessions as $session) {
+            $session->setRelation('jobs', $session->jobs()->with('setting')->orderBy('photo_setting_id')->get());
+        }
 
-        return view('livewire.camera-capture', compact('recentPhotos', 'hasProcessing'));
+        $currentSession  = $sessions->first();
+        $previousSessions = $sessions->skip(1);
+
+        $hasProcessing = $currentSession && $currentSession->jobs->contains('status', 'processing');
+
+        return view('livewire.camera-capture', compact('currentSession', 'previousSessions', 'hasProcessing'));
     }
 }
