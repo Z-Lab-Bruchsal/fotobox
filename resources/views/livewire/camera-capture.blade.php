@@ -4,7 +4,7 @@
 
     <div class="relative w-full max-w-2xl">
         <video id="video" autoplay playsinline
-               class="w-full rounded-2xl shadow-2xl bg-gray-900 aspect-video object-cover"></video>
+               class="w-full rounded-2xl shadow-2xl bg-gray-900 aspect-video object-cover" style="transform: scaleX(-1);"></video>
 
         <canvas id="canvas" class="hidden"></canvas>
 
