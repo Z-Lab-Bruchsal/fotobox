@@ -19,9 +19,12 @@ class ConvertToComic implements ShouldQueue
     public function handle(): void
     {
         $absolutePath = Storage::disk('public')->path($this->photoJob->image_path);
-        $script = base_path('convert_to_comic.sh');
 
-        $result = Process::timeout(0)->run('bash ' . escapeshellarg($script) . ' ' . escapeshellarg($absolutePath));
+        $result = Process::timeout(0)->run(
+            'gmic ' . escapeshellarg($absolutePath) .
+            ' cl_comic 4,1,0,0,1,15,15,1,10,20,6,2,0,0,0,0,0,0,50,50' .
+            ' -o ' . escapeshellarg($absolutePath)
+        );
 
         $this->photoJob->update([
             'status' => $result->successful() ? 'done' : 'failed',
