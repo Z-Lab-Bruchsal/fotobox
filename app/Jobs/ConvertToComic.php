@@ -20,12 +20,9 @@ class ConvertToComic implements ShouldQueue
     {
         $absolutePath = Storage::disk('public')->path($this->photoJob->image_path);
 
-        $gmicOps = $this->photoJob->setting?->gmic_command
-            ?? 'cl_comic 4,1,0,0,1,15,15,1,10,20,6,2,0,0,0,0,0,0,50,50';
-
         $result = Process::timeout(0)->run(
             'gmic ' . escapeshellarg($absolutePath) .
-            ' ' . $gmicOps .
+            ' cl_comic 4,1,0,0,1,15,15,1,10,20,6,2,0,0,0,0,0,0,50,50' .
             ' -o ' . escapeshellarg($absolutePath)
         );
 

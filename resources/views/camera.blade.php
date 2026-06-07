@@ -15,8 +15,6 @@
 
     @livewire('camera-capture')
 
-    @livewire('photo-settings')
-
     @livewireScripts
 </body>
 </html>
