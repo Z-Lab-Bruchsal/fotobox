@@ -2,7 +2,7 @@
      x-data="{ lightbox: null }"
      x-on:keydown.escape.window="lightbox = null">
 
-    <div class="relative w-full max-w-2xl">
+    <div class="relative w-full max-w-7xl">
         <video id="video" autoplay playsinline
                class="w-full rounded-2xl shadow-2xl bg-gray-900 aspect-video object-cover" style="transform: scaleX(-1);"></video>
 
@@ -95,7 +95,7 @@
 
         async function startCamera() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 }, audio: false });
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
                 video.srcObject = stream;
             } catch {
                 $wire.set('status', 'Camera access denied or unavailable.');
@@ -129,9 +129,9 @@
 
             triggerFlash();
 
-            canvas.width = 640;
-            canvas.height = 480;
-            canvas.getContext('2d').drawImage(video, 0, 0, 640, 480);
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
             const imageData = canvas.toDataURL('image/jpeg', 0.9);
 
             await $wire.capture(imageData);
