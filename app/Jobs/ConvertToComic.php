@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\PhotoJob;
+use App\Models\Photoprofile;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Process;
@@ -20,12 +21,14 @@ class ConvertToComic implements ShouldQueue
     {
         $absolutePath = Storage::disk('public')->path($this->photoJob->image_path);
 
-        $command = 'gmic ' . escapeshellarg($absolutePath) .
-            ' simplelocalcontrast_p 16,2,0,1,1,1,1,1,1,1,1,0' .
-            ' -o ' . escapeshellarg($absolutePath) .
-            ' && gmic ' . escapeshellarg($absolutePath) .
-            ' cl_comic 4,1,0,0,1,15,15,1,10,20,6,2,0,0,0,0,0,0,50,50' .
-            ' -o ' . escapeshellarg($absolutePath);
+        $photoprofile = Photoprofile::where('active', 1)->first();
+        $photocommands = [];
+        foreach (explode(PHP_EOL, $photoprofile->commands) as $command) {
+            if (count($photocommands) > 0) $photocommands[] = ' && gmic ' . escapeshellarg($absolutePath) . ' ' . $command . ' -o ' . escapeshellarg($absolutePath);
+            else $photocommands[] = 'gmic ' . escapeshellarg($absolutePath) . ' ' . $command . ' -o ' . escapeshellarg($absolutePath);
+        }
+        $command = implode($photocommands);
+
         $result = Process::timeout(0)->run($command);
 
         $this->photoJob->update([
