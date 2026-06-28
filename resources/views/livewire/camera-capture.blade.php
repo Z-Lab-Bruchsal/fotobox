@@ -17,7 +17,7 @@
 
     <div class="mt-6 w-full max-w-xs">
         <select wire:model="photoprofileId"
-                class="w-full rounded-full bg-white/10 text-white border border-white/20 px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-white/40 appearance-none text-center">
+                class="w-full rounded-full bg-black/50 text-white border border-white/20 px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-white/40 appearance-none text-center">
             @foreach ($photoprofiles as $id => $name)
                 <option value="{{ $id }}">{{ $name }}</option>
             @endforeach
@@ -104,7 +104,10 @@
 
         async function startCamera() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 }, audio: false });
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 4096 }, height: { ideal: 2160 } },
+                    audio: false,
+                });
                 video.srcObject = stream;
             } catch {
                 $wire.set('status', 'Camera access denied or unavailable.');
@@ -138,9 +141,9 @@
 
             triggerFlash();
 
-            canvas.width = 640;
-            canvas.height = 480;
-            canvas.getContext('2d').drawImage(video, 0, 0, 640, 480);
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
             const imageData = canvas.toDataURL('image/jpeg', 0.9);
 
             await $wire.capture(imageData);
