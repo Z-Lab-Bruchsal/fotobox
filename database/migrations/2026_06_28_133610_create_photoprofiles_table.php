@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('photoprofiles', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
+            $table->boolean('active')->default(1);
             $table->string("name");
             $table->string("commands");
         });

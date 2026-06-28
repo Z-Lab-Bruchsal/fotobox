@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
+#[Fillable('name', 'commands')]
 class Photoprofile extends Model
 {
-    protected $casts = [
-        'commands' => 'array',
-    ];
+    //
 }
