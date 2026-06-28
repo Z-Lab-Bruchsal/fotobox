@@ -26,7 +26,7 @@
                 "bradlc.vscode-tailwindcss"
             ],
             "settings": {
-                "php.validate.executablePath": "/usr/local/bin/php",
+                "php.validate.executablePath": "/usr/bin/php",
                 "intelephense.environment.phpVersion": "8.5",
                 "editor.formatOnSave": true,
                 "editor.defaultFormatter": "esbenp.prettier-vscode",
