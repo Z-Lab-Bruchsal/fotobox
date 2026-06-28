@@ -21,7 +21,8 @@ class ConvertToComic implements ShouldQueue
     {
         $absolutePath = Storage::disk('public')->path($this->photoJob->image_path);
 
-        $photoprofile = Photoprofile::where('active', 1)->first();
+        $photoprofile = $this->photoJob->photoprofile
+            ?? Photoprofile::where('active', 1)->first();
         $photocommands = [];
         foreach (explode(PHP_EOL, $photoprofile->commands) as $command) {
             if (count($photocommands) > 0) $photocommands[] = ' && gmic ' . escapeshellarg($absolutePath) . ' ' . $command . ' -o ' . escapeshellarg($absolutePath);

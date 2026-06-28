@@ -15,6 +15,15 @@
         </div>
     </div>
 
+    <div class="mt-6 w-full max-w-xs">
+        <select wire:model="photoprofileId"
+                class="w-full rounded-full bg-white/10 text-white border border-white/20 px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-white/40 appearance-none text-center">
+            @foreach ($photoprofiles as $id => $name)
+                <option value="{{ $id }}">{{ $name }}</option>
+            @endforeach
+        </select>
+    </div>
+
     <button id="capture-btn"
             wire:loading.attr="disabled"
             @disabled($hasProcessing)
