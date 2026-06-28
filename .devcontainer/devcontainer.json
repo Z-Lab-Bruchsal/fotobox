@@ -1,12 +1,8 @@
 {
     "name": "Fotobox",
-    "build": {
-        "dockerfile": "../Dockerfile",
-        "context": ".."
-    },
-    "workspaceFolder": "/workspace/fotobox",
-    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace/fotobox,type=bind",
-    "postCreateCommand": "sh docker/init.sh",
+    "image": "mcr.microsoft.com/devcontainers/base:trixie",
+
+    "postCreateCommand": "sudo sh docker/init.sh",
     "forwardPorts": [8000],
     "portsAttributes": {
         "8000": {

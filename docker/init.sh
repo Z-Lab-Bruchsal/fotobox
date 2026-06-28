@@ -13,7 +13,7 @@ ${SUDO} sh -c 'echo "deb [signed-by=/usr/share/keyrings/debsuryorg-archive-keyri
 ${SUDO} apt-get update
 
 apt-get update
-apt-get -y install php8.5 php8.5-cli php8.5-zip php8.5-sqlite3 php8.5-xml php8.5-pgsql php8.5-bcmath php8.5-intl php8.5-mbstring sqlite3
+apt-get -y install php8.5 php8.5-cli php8.5-zip php8.5-sqlite3 php8.5-xml php8.5-pgsql php8.5-bcmath php8.5-intl php8.5-mbstring sqlite3 composer npm
 curl -fsSL -o gmic.deb "https://gmic.eu/get_file.php?file=linux/gmic_3.7.6_debian13_trixie_amd64.deb"
 apt-get -y install ./gmic.deb
 rm gmic.deb
