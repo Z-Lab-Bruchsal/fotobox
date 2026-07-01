@@ -112,7 +112,7 @@
         const CAMERA_STORAGE_KEY = 'photobox_camera_id';
 
         function videoConstraints(deviceId) {
-            const base = { width: { ideal: 4096 }, height: { ideal: 2160 } };
+            const base = { width: { ideal: 2048 }, height: { ideal: 1080 } };
             return deviceId ? { ...base, deviceId: { exact: deviceId } } : base;
         }
 
