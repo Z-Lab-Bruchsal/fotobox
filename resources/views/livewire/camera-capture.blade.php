@@ -1,32 +1,43 @@
-<div class="flex flex-col items-center w-full"
+<div class="flex flex-col items-center w-full h-full"
      x-data="{ lightbox: null }"
      x-on:keydown.escape.window="lightbox = null">
 
-    <div class="relative w-full max-w-7xl">
-        <video id="video" autoplay playsinline
-               class="w-full rounded-2xl shadow-2xl bg-gray-900 aspect-video object-cover" style="transform: scaleX(-1);"></video>
+    <div class="flex-1 min-h-0 w-full flex justify-center">
+        <div class="relative h-full" style="aspect-ratio: 16/9; max-width: 100%;">
+            <video id="video" autoplay playsinline
+                   class="w-full h-full rounded-2xl shadow-2xl bg-gray-900" style="transform: scaleX(-1);"></video>
 
-        <canvas id="canvas" class="hidden"></canvas>
+            <canvas id="canvas" class="hidden"></canvas>
 
-        <div id="flash" class="absolute inset-0 rounded-2xl bg-white opacity-0 pointer-events-none transition-opacity duration-150"></div>
+            <div id="flash" class="absolute inset-0 rounded-2xl bg-white opacity-0 pointer-events-none transition-opacity duration-150"></div>
 
-        <div id="countdown" class="absolute inset-0 rounded-2xl hidden items-center justify-center bg-black/40">
-            <span id="countdown-num" class="text-white font-bold drop-shadow-lg" style="font-size: 8rem; line-height: 1;"></span>
+            <div id="countdown" class="absolute inset-0 rounded-2xl hidden items-center justify-center bg-black/40">
+                <span id="countdown-num" class="text-white font-bold drop-shadow-lg" style="font-size: 8rem; line-height: 1;"></span>
+            </div>
         </div>
+    </div>
+
+    <div class="shrink-0 mt-6 w-full max-w-xs">
+        <select wire:model="photoprofileId"
+                class="w-full rounded-full bg-black/50 text-white border border-white/20 px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-white/40 appearance-none text-center">
+            @foreach ($photoprofiles as $id => $name)
+                <option value="{{ $id }}">{{ $name }}</option>
+            @endforeach
+        </select>
     </div>
 
     <button id="capture-btn"
             wire:loading.attr="disabled"
             @disabled($hasProcessing)
-            class="mt-8 px-10 py-4 bg-white text-gray-950 font-semibold text-lg rounded-full shadow-lg hover:bg-gray-200 active:scale-95 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
+            class="shrink-0 mt-8 px-10 py-4 bg-white text-gray-950 font-semibold text-lg rounded-full shadow-lg hover:bg-gray-200 active:scale-95 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
         <span wire:loading.remove>{{ $hasProcessing ? 'Erstelle Bild...' : 'Foto aufnehmen' }}</span>
         <span wire:loading>Saving…</span>
     </button>
 
-    <div class="mt-4 text-sm text-gray-400 h-6">{{ $status }}</div>
+    <div class="shrink-0 mt-4 text-sm text-gray-400 h-6">{{ $status }}</div>
 
     @if ($recentPhotos->isNotEmpty())
-        <div class="mt-10 w-full max-w-2xl">
+        <div class="shrink-0 mt-10 w-full max-w-2xl">
             <h2 class="text-sm font-medium text-gray-400 mb-3 tracking-wide uppercase">Recent Photos</h2>
             <div class="grid grid-cols-5 gap-2" @if($hasProcessing) wire:poll.2000ms @endif>
                 @foreach ($recentPhotos as $photo)
@@ -95,7 +106,10 @@
 
         async function startCamera() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 4096 }, height: { ideal: 2160 } },
+                    audio: false,
+                });
                 video.srcObject = stream;
             } catch {
                 $wire.set('status', 'Camera access denied or unavailable.');
@@ -131,7 +145,7 @@
 
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0);
+            canvas.getContext('2d').drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
             const imageData = canvas.toDataURL('image/jpeg', 0.9);
 
             await $wire.capture(imageData);

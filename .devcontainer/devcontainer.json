@@ -1,0 +1,35 @@
+{
+    "name": "Fotobox",
+    "image": "mcr.microsoft.com/devcontainers/base:trixie",
+
+    "postCreateCommand": "sudo sh docker/init.sh",
+    "forwardPorts": [8000],
+    "portsAttributes": {
+        "8000": {
+            "label": "Laravel Dev Server",
+            "onAutoForward": "notify"
+        }
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "bmewburn.vscode-intelephense-client",
+                "onecentlin.laravel-blade",
+                "amiralizadeh9480.laravel-extra-intellisense",
+                "dbaeumer.vscode-eslint",
+                "esbenp.prettier-vscode",
+                "laravel.vscode-laravel",
+                "bradlc.vscode-tailwindcss"
+            ],
+            "settings": {
+                "php.validate.executablePath": "/usr/bin/php",
+                "intelephense.environment.phpVersion": "8.5",
+                "editor.formatOnSave": true,
+                "editor.defaultFormatter": "esbenp.prettier-vscode",
+                "[php]": {
+                    "editor.defaultFormatter": "bmewburn.vscode-intelephense-client"
+                }
+            }
+        }
+    }
+}

@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Jobs\ConvertToComic;
 use App\Models\PhotoJob;
+use App\Models\Photoprofile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Component;
@@ -11,6 +12,12 @@ use Livewire\Component;
 class CameraCapture extends Component
 {
     public string $status = '';
+    public ?int $photoprofileId = null;
+
+    public function mount(): void
+    {
+        $this->photoprofileId = Photoprofile::where('active', 1)->value('id');
+    }
 
     public function delete(int $jobId): void
     {
@@ -39,6 +46,7 @@ class CameraCapture extends Component
         $job = PhotoJob::create([
             'image_path' => $filename,
             'status' => 'processing',
+            'photoprofile_id' => $this->photoprofileId,
         ]);
 
         ConvertToComic::dispatch($job);
@@ -55,7 +63,8 @@ class CameraCapture extends Component
         ]);
 
         $hasProcessing = $recentPhotos->contains('status', 'processing');
+        $photoprofiles = Photoprofile::where('active', 1)->pluck('name', 'id');
 
-        return view('livewire.camera-capture', compact('recentPhotos', 'hasProcessing'));
+        return view('livewire.camera-capture', compact('recentPhotos', 'hasProcessing', 'photoprofiles'));
     }
 }

@@ -1,8 +1,16 @@
 <?php
 
+use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PhotoController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [PhotoController::class, 'index'])
-    ->middleware(\App\Http\Middleware\RestrictToSubnet::class)
-    ->name('camera');
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [LoginController::class, 'show'])->name('login');
+    Route::post('/login', [LoginController::class, 'login']);
+});
+
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout')->middleware('auth');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/', [PhotoController::class, 'index'])->name('camera');
+});

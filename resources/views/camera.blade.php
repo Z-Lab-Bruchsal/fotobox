@@ -9,11 +9,13 @@
     @endif
     @livewireStyles
 </head>
-<body class="bg-gray-950 text-white min-h-screen flex flex-col items-center justify-center p-6">
+<body class="bg-gray-950 text-white h-screen flex flex-col items-center p-6 overflow-hidden">
 
-    <h1 class="text-3xl font-bold mb-8 tracking-wide">Fotobox</h1>
+    <h1 class="shrink-0 text-3xl font-bold mb-8 tracking-wide">Fotobox</h1>
 
-    @livewire('camera-capture')
+    <div class="flex-1 min-h-0 w-full flex flex-col items-center">
+        @livewire('camera-capture')
+    </div>
 
     @livewireScripts
 </body>
