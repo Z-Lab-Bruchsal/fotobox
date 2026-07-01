@@ -24,6 +24,11 @@
         </select>
     </div>
 
+    <div id="camera-select-wrap" class="mt-3 w-full max-w-xs hidden">
+        <select id="camera-select"
+                class="w-full rounded-full bg-black/50 text-white border border-white/20 px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-white/40 appearance-none text-center"></select>
+    </div>
+
     <button id="capture-btn"
             wire:loading.attr="disabled"
             @disabled($hasProcessing)
@@ -101,19 +106,72 @@
         const flash = document.getElementById('flash');
         const countdown = document.getElementById('countdown');
         const countdownNum = document.getElementById('countdown-num');
+        const cameraSelectWrap = document.getElementById('camera-select-wrap');
+        const cameraSelect = document.getElementById('camera-select');
 
-        async function startCamera() {
+        const CAMERA_STORAGE_KEY = 'photobox_camera_id';
+
+        function videoConstraints(deviceId) {
+            const base = { width: { ideal: 4096 }, height: { ideal: 2160 } };
+            return deviceId ? { ...base, deviceId: { exact: deviceId } } : base;
+        }
+
+        async function startCamera(deviceId) {
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+            }
+
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: { ideal: 4096 }, height: { ideal: 2160 } },
+                    video: videoConstraints(deviceId),
                     audio: false,
                 });
                 video.srcObject = stream;
-            } catch {
+                btn.disabled = false;
+            } catch (err) {
+                if (deviceId && err.name === 'OverconstrainedError') {
+                    localStorage.removeItem(CAMERA_STORAGE_KEY);
+                    return startCamera(null);
+                }
                 $wire.set('status', 'Camera access denied or unavailable.');
                 btn.disabled = true;
             }
         }
+
+        async function populateCameraList() {
+            let devices;
+            try {
+                devices = await navigator.mediaDevices.enumerateDevices();
+            } catch {
+                return;
+            }
+
+            const cameras = devices.filter(d => d.kind === 'videoinput');
+            if (cameras.length < 2) {
+                cameraSelectWrap.classList.add('hidden');
+                return;
+            }
+
+            cameraSelect.innerHTML = '';
+            cameras.forEach((cam, index) => {
+                const option = document.createElement('option');
+                option.value = cam.deviceId;
+                option.textContent = cam.label || `Camera ${index + 1}`;
+                cameraSelect.appendChild(option);
+            });
+
+            const storedId = localStorage.getItem(CAMERA_STORAGE_KEY);
+            if (storedId && cameras.some(cam => cam.deviceId === storedId)) {
+                cameraSelect.value = storedId;
+            }
+
+            cameraSelectWrap.classList.remove('hidden');
+        }
+
+        cameraSelect.addEventListener('change', () => {
+            localStorage.setItem(CAMERA_STORAGE_KEY, cameraSelect.value);
+            startCamera(cameraSelect.value);
+        });
 
         function triggerFlash() {
             flash.style.opacity = '0.8';
@@ -149,7 +207,10 @@
             await $wire.capture(imageData);
         });
 
-        startCamera();
+        (async () => {
+            await startCamera(localStorage.getItem(CAMERA_STORAGE_KEY));
+            await populateCameraList();
+        })();
     </script>
     @endscript
 </div>
