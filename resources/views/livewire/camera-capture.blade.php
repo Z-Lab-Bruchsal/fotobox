@@ -34,14 +34,14 @@
             @disabled($hasProcessing)
             class="mt-8 px-10 py-4 bg-white text-gray-950 font-semibold text-lg rounded-full shadow-lg hover:bg-gray-200 active:scale-95 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
         <span wire:loading.remove>{{ $hasProcessing ? 'Erstelle Bild...' : 'Foto aufnehmen' }}</span>
-        <span wire:loading>Saving…</span>
+        <span wire:loading>Speichere…</span>
     </button>
 
     <div class="mt-4 text-sm text-gray-400 h-6">{{ $status }}</div>
 
     @if ($recentPhotos->isNotEmpty())
         <div class="mt-10 w-full max-w-2xl">
-            <h2 class="text-sm font-medium text-gray-400 mb-3 tracking-wide uppercase">Recent Photos</h2>
+            <h2 class="text-sm font-medium text-gray-400 mb-3 tracking-wide uppercase">Fotos</h2>
             <div class="grid grid-cols-5 gap-2" @if($hasProcessing) wire:poll.2000ms @endif>
                 @foreach ($recentPhotos as $photo)
                     <div class="relative">

@@ -27,7 +27,7 @@ class CameraCapture extends Component
         Storage::disk('public')->delete($job->image_path);
         $job->delete();
 
-        $this->status = "Job #{$jobId} deleted";
+        $this->status = "Photo #{$jobId} gelöscht";
     }
 
     public function capture(string $imageData): void
@@ -51,7 +51,7 @@ class CameraCapture extends Component
 
         ConvertToComic::dispatch($job);
 
-        $this->status = "Processing photo…";
+        $this->status = "Verarbeite Foto…";
     }
 
     public function render()
